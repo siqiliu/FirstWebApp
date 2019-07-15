@@ -1,0 +1,189 @@
+<html>
+<head>
+	<title>Page Title</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<style>
+		* {
+		  box-sizing: border-box;
+		}
+
+		/* Create two equal columns that floats next to each other */
+		.column {
+		  float: left;
+		  width: 50%;
+		  padding: 10px;
+		}
+
+		/* Clear floats after the columns */
+		.row:after {
+		  content: "";
+		  display: table;
+		  clear: both;
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Siqi 1st Web Project</h1>
+    <form>
+      <fieldset>
+      	<legend>Nearest Word Generator</legend>
+      		<p>Given a “word”, a “delta”
+and a “number”. It will generate the "number" of words from the dictionary which are
+"delta" distance away from the input “word”. Distance is the number of operations needed to
+transform the input-word into a new word. A single operation is defined as one addition, removal
+or replacement of a single letter.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Dictionary</legend>
+        <p>
+          <label>Loaded Dictionary: </label>
+          <a href="https://raw.githubusercontent.com/dwyl/english-words/master/words.txt" target="_blank">https://raw.githubusercontent.com/dwyl/english-words/master/words.txt</a><br><br>
+          <input type="button" value="Load New Dictionary" onclick="downloadWords()" />
+          <input style="width:600px; color:#b4b4b4" type = "text" id = "inText" value = "Copy and paste your dictionary link here" />
+          <script>
+				function downloadWords() 
+				{
+					var source_file_url = document.getElementById('inText').value;
+					$.ajax({
+						url: '/API1',
+						dataType: "json",
+						data:  {'link': source_file_url},
+						//data: source_file_url,
+						type: 'POST',
+						//jsonpCallback: 'callback', // this is not relevant to the POST   anymore
+						complete: function (data) {
+							//var ret = jQuery.parseJSON(data);
+							//console.log(data);
+							$('#cache').html(data.responseJSON);
+						},
+						/*
+						error: function (xhr, status, error) {
+							$('#cache').html('Error connecting to the server.');
+						},
+						*/
+					});
+				}
+          </script>
+          <p id="cache"></p>
+        </p>
+      </fieldset>
+      <fieldset>
+      	<legend>Parameters</legend>
+        <p>
+          <label>Word&nbsp;&nbsp;&nbsp;&nbsp;</label>
+          <input type = "text" id = "inWord" value = "Amazing" />
+        </p>
+        <p>
+          <label>Delta&nbsp;&nbsp;&nbsp;&nbsp;</label>
+          <input type = "text" id = "inDelta" value = "3" />
+        </p>
+        <p>
+          <label>Number</label>
+          <input type = "text" id = "inNumber" value = "2" />
+        </p>
+      </fieldset>
+      <fieldset>
+        <legend> Output</legend>
+        <p>
+          <label>Get List From Dictionary</label>
+          <input type="button" value="Test" onclick="parseWords()" />
+          <script>
+				function parseWords()
+				{
+					var word =  document.getElementById('inWord').value;
+					var delta =  document.getElementById('inDelta').value;
+					if (isNaN(delta)) 
+  					{
+    					alert("Delta must input numbers");
+    					return false;
+  					}
+
+					var number =  document.getElementById('inNumber').value;
+					if (isNaN(number)) 
+  					{
+    					alert("Number must input numbers");
+    					return false;
+  					}
+					
+					//console.log(word);
+					//console.log(delta);
+					//console.log(number);
+					//var str = word + " " + delta + " " + number;
+					//console.log(str);
+					
+					$.ajax({
+						url: '/API2',
+						dataType: "json",
+						data:  { 'word': word, 'delta': delta, 'number': number },
+						//data: source_file_url,
+						type: 'POST',
+						//jsonpCallback: 'callback', // this is not relevant to the POST   anymore
+						complete: function (data) {
+							var resArr = data.responseJSON.split("\n");
+							const exeTime = resArr[resArr.length - 2] + "s";
+							var newRes = "";
+							for (var i = 0; i < resArr.length - 2; i++) {
+								    newRes += resArr[i];
+								    newRes += " ";
+							}
+							$('#cppResponse').html(newRes);
+							$('#cppExeTime').html(exeTime);
+						},
+						
+						/*
+						error: function (xhr, status, error) {
+							$('#cache').html('Error connecting to the server.');
+						},
+						*/
+					});
+
+					$.ajax({
+						url: '/API3',
+						dataType: "json",
+						data:  { 'word': word, 'delta': delta, 'number': number },
+						//data: source_file_url,
+						type: 'POST',
+						//jsonpCallback: 'callback', // this is not relevant to the POST   anymore
+						complete: function (data) {
+							var resArr = data.responseJSON.split("\n");
+							const exeTime = resArr[resArr.length - 2] + "s";
+							var newRes = "";
+							for (var i = 0; i < resArr.length - 2; i++) {
+								    newRes += resArr[i];
+								    newRes += " ";
+							}
+							$('#pyResponse').html(newRes);
+							$('#pyExeTime').html(exeTime);
+						},
+						
+						/*
+						error: function (xhr, status, error) {
+							$('#cache').html('Error connecting to the server.');
+						},
+						*/
+					});
+				}
+          </script>
+        </p>
+        
+        <div class="row">
+		  <div class="column" style="background-color:#eee;">
+		    <h2 style="font-size:17px; font-weight: normal;">C++ execute time:&nbsp;&nbsp;
+		    	<a id="cppExeTime" ></a>
+		    </h2>
+		    <p id="cppResponse"></p>
+		  </div>
+		  <div class="column" style="background-color:#ddd;">
+		    <h2 style="font-size:17px; font-weight: normal;">Python execute time:&nbsp;&nbsp;
+		    	<a id="pyExeTime"></a>
+		    </h2>
+		    <p id="pyResponse"></p>
+		  </div>
+		</div>
+      </fieldset>
+    </form>
+</body>
+</html>
